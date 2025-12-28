@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Ghi Nhớ Lật Thẻ Play Together</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .countdown {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+        
+        .countdown b {
+            color: #ffd700;
+            font-size: 1.2em;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .controls label {
+            font-weight: bold;
+        }
+        
+        .controls input {
+            width: 60px;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 1em;
+        }
+        
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .controls button:active {
+            transform: translateY(0);
+        }
+        
+        #icons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .icon {
+            width: 60px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .icon:hover {
+            transform: scale(1.1);
+            border-color: rgba(255, 215, 0, 0.8);
+        }
+        
+        .icon.selected {
+            border: 4px solid gold;
+            box-shadow: 0 0 20px gold;
+            transform: scale(1.15);
+        }
+        
+        .icon img {
+            width: 50px;
+            height: 70px;
+            object-fit: contain;
+            pointer-events: none;
+        }
+        
+        #grid {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            margin: 25px auto;
+        }
+        
+        .cell {
+            width: 70px;
+            height: 95px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell:hover {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .cell.selected {
+            border: 4px solid gold;
+            box-shadow: 0 0 20px gold;
+        }
+        
+        .cell.matched {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4caf50;
+            animation: matchPulse 0.5s ease;
+        }
+        
+        @keyframes matchPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        
+        .cell.matched::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #4caf50;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .info-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            line-height: 1.8;
+        }
+        
+        .info-box p {
+            margin-bottom: 10px;
+        }
+        
+        .info-box a {
+            color: #ffd700;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        
+        .info-box a:hover {
+            color: #ffed4e;
+            text-decoration: underline;
+        }
+        
+        .mode-indicator {
+            text-align: center;
+            background: rgba(255, 215, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .controls {
+                font-size: 0.9em;
+            }
+            
+            .icon {
+                width: 50px;
+                height: 70px;
+            }
+            
+            .icon img {
+                width: 40px;
+                height: 60px;
+            }
+            
+            .cell {
+                width: 60px;
+                height: 80px;
+            }
+            
+            .stat-number {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Tool Ghi Nhớ Lật Thẻ</h1>
+        <p class="subtitle">Play Together Memory Helper</p>
+        
+        <div class="countdown" id="countdown">
+            ⏰ Kết thúc sau: <b>
+                <span id="days">0</span> ngày : 
+                <span id="hours">0</span> giờ : 
+                <span id="minutes">0</span> phút : 
+                <span id="seconds">0</span> giây
+            </b>
+        </div>
+        
+        <div class="mode-indicator">
+            🎯 Chế độ: Ghi nhớ vị trí thẻ
+        </div>
+        
+        <div class="controls">
+            <label>Hàng:</label>
+            <input id="rows" type="number" value="4" min="2" max="10">
+            <label>Cột:</label>
+            <input id="cols" type="number" value="4" min="2" max="10">
+            <button id="reset">🔄 Tạo mới</button>
+            <button id="clear">🗑️ Xóa hết</button>
+        </div>
+        
+        <div id="icons"></div>
+        <div id="grid"></div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalCells">0</div>
+                <div class="stat-label">Tổng ô</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="filledCells">0</div>
+                <div class="stat-label">Đã ghi</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="matchedPairs">0</div>
+                <div class="stat-label">Đã ghép</div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <p>📌 <strong>Hướng dẫn sử dụng:</strong></p>
+            <p>• <strong>Chọn thẻ:</strong> Click vào thẻ bên dưới để chọn</p>
+            <p>• <strong>Ghi vị trí:</strong> Click vào ô trống để ghi lại thẻ bạn vừa lật trong game</p>
+            <p>• <strong>Xóa thẻ:</strong> Click lại vào ô đã ghi để xóa</p>
+            <p>• <strong>Ghép cặp:</strong> Khi tìm thấy 2 thẻ giống nhau, chọn cả 2 ô để đánh dấu đã ghép</p>
+            <p>• <strong>Reset:</strong> Bắt đầu ván mới bằng nút "Tạo mới"</p>
+            <p><a href="https://www.tiktok.com/@tunasama.206" target="_blank">👉 Góp ý và báo lỗi tại đây</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Countdown timer
+        const endTime = new Date("2026-01-09 06:59:59").getTime();
+        
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance <= 0) {
+                clearInterval(timer);
+                document.getElementById("countdown").innerHTML = "🎉 Sự kiện đã kết thúc!";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = days;
+            document.getElementById("hours").innerText = hours;
+            document.getElementById("minutes").innerText = minutes;
+            document.getElementById("seconds").innerText = seconds;
+        }, 1000);
+
+        // Card icons
+        const ICONS = {
+            1: "https://lh3.googleusercontent.com/d/1Wf8ADNBb7XLM8F5Zw6BPy8Ic03fGS7e7",
+            2: "https://lh3.googleusercontent.com/d/17kC8nrDxKyPITTjYDI0AhA3hMQxZKZ_r",
+            3: "https://lh3.googleusercontent.com/d/1Fu2BBqKBBgT0yE_NPhG-6Xcq4GPy3MXc",
+            4: "https://lh3.googleusercontent.com/d/1DxPK093KE6GXvajTOFh-TwAK0Nygm14T",
+            5: "https://lh3.googleusercontent.com/d/1Wd7wsKkZys2A1J5x_IjlpfAqKBJQJdYp",
+            6: "https://lh3.googleusercontent.com/d/1qTi-9QIB0k-7M7mq8-7ZKLKW_AQRtV4r",
+            7: "https://lh3.googleusercontent.com/d/11PqBIVFCEBGy_vhJeebo1eda9mgQryZU",
+            8: "https://lh3.googleusercontent.com/d/1qckrKrlMhI-0eOTSojdvD1CyVckysN_W",
+            9: "https://lh3.googleusercontent.com/d/1qUnj0DlVWJT0MWVScfKFWYTV0xFw3KRm"
+        };
+
+        const iconsDiv = document.getElementById("icons");
+        const grid = document.getElementById("grid");
+        const rowsInput = document.getElementById("rows");
+        const colsInput = document.getElementById("cols");
+
+        let selectedIcon = null;
+        let selectedIconElement = null;
+        let firstSelectedCell = null;
+
+        // Create icon selector
+        for (let i = 1; i <= 9; i++) {
+            const iconEl = document.createElement("div");
+            iconEl.className = "icon";
+            iconEl.innerHTML = `<img src="${ICONS[i]}" alt="Icon ${i}">`;
+            iconEl.dataset.icon = ICONS[i];
+            
+            iconEl.onclick = () => {
+                document.querySelectorAll(".icon").forEach(el => el.classList.remove("selected"));
+                iconEl.classList.add("selected");
+                selectedIcon = ICONS[i];
+                selectedIconElement = iconEl;
+                clearCellSelection();
+            };
+            
+            iconsDiv.appendChild(iconEl);
+        }
+
+        // Create grid
+        function createGrid() {
+            grid.innerHTML = "";
+            const rows = parseInt(rowsInput.value);
+            const cols = parseInt(colsInput.value);
+            
+            grid.style.gridTemplateColumns = `repeat(${cols}, 70px)`;
+            
+            const totalCells = rows * cols;
+            document.getElementById("totalCells").textContent = totalCells;
+            
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.dataset.index = i;
+                
+                cell.onclick = () => handleCellClick(cell);
+                
+                grid.appendChild(cell);
+            }
+            
+            updateStats();
+            clearCellSelection();
+        }
+
+        // Handle cell click
+        function handleCellClick(cell) {
+            // If an icon is selected, place it in the cell
+            if (selectedIcon && !cell.classList.contains("matched")) {
+                if (cell.innerHTML) {
+                    // Remove card if clicking on same cell
+                    cell.innerHTML = "";
+                    cell.classList.remove("selected");
+                } else {
+                    // Place card
+                    cell.innerHTML = `<img src="${selectedIcon}" alt="Card">`;
+                    cell.dataset.icon = selectedIcon;
+                }
+                updateStats();
+                return;
+            }
+            
+            // If no icon selected, select cells for matching
+            if (!cell.innerHTML || cell.classList.contains("matched")) return;
+            
+            if (!firstSelectedCell) {
+                // Select first cell
+                firstSelectedCell = cell;
+                cell.classList.add("selected");
+            } else if (firstSelectedCell === cell) {
+                // Deselect if clicking same cell
+                cell.classList.remove("selected");
+                firstSelectedCell = null;
+            } else {
+                // Check if cards match
+                const firstIcon = firstSelectedCell.dataset.icon;
+                const secondIcon = cell.dataset.icon;
+                
+                if (firstIcon === secondIcon) {
+                    // Match found!
+                    firstSelectedCell.classList.add("matched");
+                    firstSelectedCell.classList.remove("selected");
+                    cell.classList.add("matched");
+                    updateStats();
+                }
+                
+                clearCellSelection();
+            }
+        }
+
+        // Clear cell selection
+        function clearCellSelection() {
+            if (firstSelectedCell) {
+                firstSelectedCell.classList.remove("selected");
+            }
+            firstSelectedCell = null;
+        }
+
+        // Update statistics
+        function updateStats() {
+            const cells = document.querySelectorAll(".cell");
+            let filled = 0;
+            let matched = 0;
+            
+            cells.forEach(cell => {
+                if (cell.innerHTML) filled++;
+                if (cell.classList.contains("matched")) matched++;
+            });
+            
+            document.getElementById("filledCells").textContent = filled;
+            document.getElementById("matchedPairs").textContent = Math.floor(matched / 2);
+        }
+
+        // Clear all cells
+        document.getElementById("clear").onclick = () => {
+            if (confirm("Bạn có chắc muốn xóa tất cả không?")) {
+                document.querySelectorAll(".cell").forEach(cell => {
+                    cell.innerHTML = "";
+                    cell.classList.remove("selected", "matched");
+                    delete cell.dataset.icon;
+                });
+                updateStats();
+                clearCellSelection();
+            }
+        };
+
+        // Reset button
+        document.getElementById("reset").onclick = createGrid;
+
+        // Initialize
+        createGrid();
+    </script>
+</body>
+</html>
