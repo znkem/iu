@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ngoc Anh Play Together</title>
+    <title>Ngọc Anh Play Together</title>
     <style>
         * {
             margin: 0;
@@ -28,7 +28,7 @@
             padding: 30px;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
-            width: 100%; /* Đảm bảo container không bị cứng */
+            width: 100%;
         }
         
         h1 {
@@ -143,21 +143,20 @@
             pointer-events: none;
         }
         
-        /* --- PHẦN GRID TỐI ƯU --- */
         #grid {
             display: grid;
-            gap: 8px; /* Khoảng cách giữa các ô */
+            gap: 8px;
             justify-content: center;
             margin: 25px auto;
             width: 100%;
         }
         
         .cell {
-            width: 100%; /* Chiếm hết chiều rộng ô lưới cho phép */
-            aspect-ratio: 3/4; /* Giữ tỷ lệ khung hình chữ nhật lá bài */
+            width: 100%;
+            aspect-ratio: 3/4;
             background: rgba(0, 0, 0, 0.4);
             border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px; /* Bo góc nhỏ hơn chút để đỡ bị thô khi ô nhỏ */
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
@@ -179,14 +178,26 @@
         }
         
         .cell.matched {
-            background: rgba(76, 175, 80, 0.3);
+            background: rgba(76, 175, 80, 0.2);
             border-color: #4caf50;
-            animation: matchPulse 0.5s ease;
+            animation: matchFade 0.8s ease forwards;
+            pointer-events: none;
+            opacity: 0.3;
         }
         
-        @keyframes matchPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        @keyframes matchFade {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(0.95);
+                opacity: 0.3;
+            }
         }
         
         .cell img {
@@ -195,6 +206,10 @@
             object-fit: contain;
             border-radius: 4px;
             pointer-events: none;
+        }
+        
+        .cell.matched img {
+            opacity: 0.3;
         }
         
         .cell.matched::after {
@@ -273,14 +288,13 @@
             font-weight: bold;
         }
         
-        /* RESPONSIVE CHO MOBILE */
         @media (max-width: 600px) {
             body {
-                padding: 5px; /* Giảm padding body */
+                padding: 5px;
             }
             
             .container {
-                padding: 15px 10px; /* Giảm padding container */
+                padding: 15px 10px;
                 max-width: 100%;
             }
             
@@ -288,13 +302,12 @@
                 font-size: 1.5em;
             }
             
-            /* Tối ưu Grid cho màn hình nhỏ */
             #grid {
-                gap: 4px; /* Giảm khoảng cách giữa các ô */
+                gap: 4px;
             }
             
             .cell {
-                border-width: 1px; /* Viền mỏng hơn */
+                border-width: 1px;
                 border-radius: 6px;
             }
             
@@ -320,8 +333,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Ngoc Anh Play Together</h1>
-        <p class="subtitle">Play Together Event Support</p>
+        <h1>🎮 Ngọc Anh Play Together</h1>
+        <p class="subtitle">Play Together Hỗ Trợ</p>
         
         <div class="countdown" id="countdown">
             ⏰ Kết thúc sau: <b>
@@ -409,7 +422,8 @@
             6: "https://lh3.googleusercontent.com/d/1qTi-9QIB0k-7M7mq8-7ZKLKW_AQRtV4r",
             7: "https://lh3.googleusercontent.com/d/11PqBIVFCEBGy_vhJeebo1eda9mgQryZU",
             8: "https://lh3.googleusercontent.com/d/1qckrKrlMhI-0eOTSojdvD1CyVckysN_W",
-            9: "https://lh3.googleusercontent.com/d/1qUnj0DlVWJT0MWVScfKFWYTV0xFw3KRm"
+            9: "https://lh3.googleusercontent.com/d/1qUnj0DlVWJT0MWVScfKFWYTV0xFw3KRm",
+            10: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%234CAF50'/%3E%3Cpath d='M25 50 L40 65 L75 30' stroke='white' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" // Icon "Đã xong" - dấu tick xanh
         };
 
         const iconsDiv = document.getElementById("icons");
@@ -422,7 +436,7 @@
         let firstSelectedCell = null;
 
         // Create icon selector
-        for (let i = 1; i <= 9; i++) {
+        for (let i = 1; i <= 10; i++) {
             const iconEl = document.createElement("div");
             iconEl.className = "icon";
             iconEl.innerHTML = `<img src="${ICONS[i]}" alt="Icon ${i}">`;
@@ -445,7 +459,6 @@
             const rows = parseInt(rowsInput.value);
             const cols = parseInt(colsInput.value);
             
-            // --- THAY ĐỔI QUAN TRỌNG: Sử dụng 'fr' thay vì 'px' cứng ---
             grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
             
             const totalCells = rows * cols;
